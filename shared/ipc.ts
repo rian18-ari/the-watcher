@@ -1,6 +1,6 @@
 import type { ActivePort } from './types'
 
-export interface EdgemonBridge {
+export interface WatcherBridge {
   loadState: () => Promise<{ ports: ActivePort[] }>
   killPort: (pid: number) => Promise<boolean>
   openUrl: (url: string) => Promise<void>
@@ -9,8 +9,11 @@ export interface EdgemonBridge {
   onCursorEdge: (callback: (edge: { near: boolean; x: number; y: number }) => void) => () => void
 }
 
+export type EdgemonBridge = WatcherBridge
+
 declare global {
   interface Window {
-    edgemon: EdgemonBridge
+    watcher?: WatcherBridge
+    edgemon?: WatcherBridge
   }
 }

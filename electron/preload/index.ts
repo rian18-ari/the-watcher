@@ -1,9 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { IpcRendererEvent } from 'electron'
-import type { EdgemonBridge } from '../../shared/ipc'
+import type { WatcherBridge } from '../../shared/ipc'
 import type { ActivePort } from '../../shared/types'
 
-const bridge: EdgemonBridge = {
+const bridge: WatcherBridge = {
   loadState: () => ipcRenderer.invoke('state:load'),
   killPort: (pid: number) => ipcRenderer.invoke('port:kill', pid),
   openUrl: (url: string) => ipcRenderer.invoke('url:open', url),
@@ -24,4 +24,5 @@ const bridge: EdgemonBridge = {
   }
 }
 
+contextBridge.exposeInMainWorld('watcher', bridge)
 contextBridge.exposeInMainWorld('edgemon', bridge)

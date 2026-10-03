@@ -13,15 +13,16 @@ export const App: React.FC = () => {
   const { handlePanelMouseEnter, handlePanelMouseLeave } = useEdgeHover()
 
   useEffect(() => {
-    if (!window.edgemon) return
+    const bridge = window.watcher || window.edgemon
+    if (!bridge) return
 
     // Initial state load
-    window.edgemon.loadState().then(({ ports }) => {
+    bridge.loadState().then(({ ports }) => {
       setPorts(ports)
     })
 
     // Real-time port broadcast listener
-    const unsub = window.edgemon.onPortsUpdate((updated) => {
+    const unsub = bridge.onPortsUpdate((updated) => {
       setPorts(updated)
     })
 

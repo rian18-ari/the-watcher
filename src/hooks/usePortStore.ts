@@ -16,19 +16,22 @@ export const usePortStore = create<PortStoreState>((set) => ({
   setPorts: (ports) => set({ ports }),
   setIsOpen: (isOpen) => {
     set({ isOpen })
-    if (window.edgemon) {
-      window.edgemon.setInteractive(isOpen)
+    const bridge = window.watcher || window.edgemon
+    if (bridge) {
+      bridge.setInteractive(isOpen)
     }
   },
   killPort: async (pid) => {
-    if (window.edgemon) {
-      return await window.edgemon.killPort(pid)
+    const bridge = window.watcher || window.edgemon
+    if (bridge) {
+      return await bridge.killPort(pid)
     }
     return false
   },
   openUrl: async (url) => {
-    if (window.edgemon) {
-      await window.edgemon.openUrl(url)
+    const bridge = window.watcher || window.edgemon
+    if (bridge) {
+      await bridge.openUrl(url)
     }
   }
 }))

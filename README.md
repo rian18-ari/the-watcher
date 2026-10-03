@@ -1,8 +1,8 @@
-# EdgeMon 🟢
+# The Watcher 🟢
 
 > **Lightweight, Zero-Config Screen-Edge HUD for Active Dev Ports & Background Servers.**
 
-EdgeMon sits completely transparent and click-through on the leftmost edge of your screen. Whenever you run a local server (`npm run dev`, `docker`, `python`, etc.) in ANY terminal, EdgeMon automatically detects the listening port and project name. 
+The Watcher sits completely transparent and click-through on the leftmost edge of your screen. Whenever you run a local server (`npm run dev`, `docker`, `python`, etc.) in ANY terminal, The Watcher automatically detects the listening port and project name. 
 
 When you slide your mouse to the screen edge, it smoothly expands with spring physics, giving you a live view of all your running servers with 1-click browser access and 1-click port killer.
 
@@ -19,26 +19,24 @@ When you slide your mouse to the screen edge, it smoothly expands with spring ph
 - 🎛️ **System Tray Integration**: Quietly resides in your Windows taskbar tray (near the clock) with right-click menu:
   - Live port status counter
   - **"Start on Windows Boot"** toggle
-  - **"Quit EdgeMon"**
-- ⚡ **Lightweight Production Mode**: Runs silently with no terminal windows, consuming minimal system resources.
+  - **"Quit The Watcher"**
+- ⚡ **Lightweight Production Mode**: Runs silently with no terminal windows, consuming minimal system resources (~45MB RAM).
 
 ---
 
-## 🚀 How to Launch EdgeMon
+## 🚀 How to Launch The Watcher
 
 ### Option A: From Desktop or Start Menu (Recommended)
-- **Desktop**: Double-click the **EdgeMon** shortcut created on your Desktop.
-- **Start Menu**: Press the Windows key, type `EdgeMon`, and hit Enter.
+- **Desktop**: Double-click the **The Watcher** shortcut created on your Desktop.
+- **Start Menu**: Press the Windows key, type `The Watcher`, and hit Enter.
 
 ### Option B: From Terminal (Production Mode)
 ```powershell
-cd C:\proyek\edgemon
 npm start
 ```
 
 ### Option C: Development Mode (Hot Reload)
 ```powershell
-cd C:\proyek\edgemon
 npm run dev
 ```
 
@@ -46,6 +44,6 @@ npm run dev
 
 ## ⚙️ Auto-Start on Windows Boot
 
-1. Right-click the **EdgeMon** tray icon (near your clock in the bottom-right taskbar).
+1. Right-click **The Watcher** tray icon (near your clock in the bottom-right taskbar).
 2. Check **"Start on Windows Boot"**.
-3. Now EdgeMon will automatically launch in the background every time you turn on your laptop!
+3. Now The Watcher will automatically launch in the background every time you turn on your laptop!

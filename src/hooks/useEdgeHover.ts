@@ -15,9 +15,10 @@ export function useEdgeHover() {
   isOpenRef.current = isOpen
 
   useEffect(() => {
-    if (!window.edgemon) return
+    const bridge = window.watcher || window.edgemon
+    if (!bridge) return
 
-    const unsubCursor = window.edgemon.onCursorEdge((edge) => {
+    const unsubCursor = bridge.onCursorEdge((edge) => {
       // 1. Opening logic: cursor hits the very edge
       if (edge.near) {
         if (!isOpenRef.current && dwellTimerRef.current === null) {

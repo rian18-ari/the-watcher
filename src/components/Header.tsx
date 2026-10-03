@@ -38,7 +38,7 @@ export const Header: React.FC = () => {
         </div>
         <div>
           <div style={{ fontWeight: 600, fontSize: '14px', letterSpacing: '-0.2px' }}>
-            Port Monitor
+            The Watcher
           </div>
           <div
             style={{

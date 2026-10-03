@@ -1,11 +1,12 @@
 import { Tray, Menu, app, nativeImage } from 'electron'
+import type { NativeImage } from 'electron'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
 
 let tray: Tray | null = null
 let lastPortCount = 0
 
-function getTrayIcon(): nativeImage {
+function getTrayIcon(): NativeImage {
   const candidates = [
     join(process.resourcesPath, 'resources', 'icon.ico'),
     join(process.resourcesPath, 'resources', 'tray.png'),
@@ -30,7 +31,7 @@ export function createTray(): Tray {
   const icon = getTrayIcon()
   tray = new Tray(icon)
   try {
-    tray.setToolTip('EdgeMon')
+    tray.setToolTip('The Watcher')
   } catch {
     // Ignore
   }
@@ -44,7 +45,7 @@ export function updateTrayPorts(count: number): void {
   lastPortCount = count
   if (!tray || tray.isDestroyed()) return
 
-  const tooltip = count > 0 ? `EdgeMon: ${count} active port${count > 1 ? 's' : ''}` : 'EdgeMon'
+  const tooltip = count > 0 ? `The Watcher: ${count} active port${count > 1 ? 's' : ''}` : 'The Watcher'
   try {
     tray.setToolTip(tooltip)
   } catch {
@@ -61,7 +62,7 @@ function rebuildMenu(): void {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'EdgeMon • Port Monitor',
+      label: 'The Watcher • Port Monitor',
       enabled: false
     },
     {
@@ -85,7 +86,7 @@ function rebuildMenu(): void {
     },
     { type: 'separator' },
     {
-      label: 'Quit EdgeMon',
+      label: 'Quit The Watcher',
       click: () => {
         app.quit()
       }

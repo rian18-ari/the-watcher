@@ -1,8 +1,8 @@
 {
-  "name": "edgemon",
+  "name": "the-watcher",
   "version": "0.1.0",
-  "description": "EdgeMon — a lightweight desktop shelf that lives on the screen edge to monitor active ports.",
-  "author": "EdgeMon",
+  "description": "The Watcher — a lightweight desktop shelf that lives on the screen edge to monitor active ports.",
+  "author": "The Watcher",
   "license": "MIT",
   "private": true,
   "main": "out/main/index.js",
@@ -18,8 +18,8 @@
     "typecheck": "npm run typecheck:node && npm run typecheck:web"
   },
   "build": {
-    "appId": "com.edgemon.app",
-    "productName": "EdgeMon",
+    "appId": "com.thewatcher.app",
+    "productName": "The Watcher",
     "directories": {
       "output": "dist",
       "buildResources": "resources"
