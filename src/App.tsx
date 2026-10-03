@@ -22,11 +22,21 @@ export const App: React.FC = () => {
     })
 
     // Real-time port broadcast listener
-    const unsub = bridge.onPortsUpdate((updated) => {
+    const unsubPorts = bridge.onPortsUpdate((updated) => {
       setPorts(updated)
     })
 
-    return () => unsub()
+    // Real-time shelf toggle listener (from tray, shortcut, notification)
+    const unsubToggle = bridge.onToggleShelf?.((forceOpen) => {
+      const current = usePortStore.getState().isOpen
+      const next = typeof forceOpen === 'boolean' ? forceOpen : !current
+      usePortStore.getState().setIsOpen(next)
+    })
+
+    return () => {
+      unsubPorts()
+      if (unsubToggle) unsubToggle()
+    }
   }, [setPorts])
 
   return (

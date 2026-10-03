@@ -1,4 +1,4 @@
 Set WshShell = CreateObject("WScript.Shell")
 WshShell.CurrentDirectory = "C:\proyek\edgemon"
-WshShell.Run "cmd /c npx electron .", 0, False
+WshShell.Run """C:\proyek\edgemon\node_modules\electron\dist\electron.exe"" .", 0, False
 Set WshShell = Nothing

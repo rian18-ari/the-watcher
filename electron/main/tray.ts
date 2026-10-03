@@ -5,13 +5,19 @@ import { existsSync } from 'node:fs'
 
 let tray: Tray | null = null
 let lastPortCount = 0
+let toggleShelfHandler: ((forceOpen?: boolean) => void) | null = null
+
+export function setTrayToggleShelfHandler(handler: (forceOpen?: boolean) => void): void {
+  toggleShelfHandler = handler
+}
 
 function getTrayIcon(): NativeImage {
   const candidates = [
-    join(process.resourcesPath, 'resources', 'icon.ico'),
-    join(process.resourcesPath, 'resources', 'tray.png'),
-    join(process.resourcesPath, 'icon.ico'),
+    join(app.getAppPath(), 'resources', 'tray.png'),
     join(app.getAppPath(), 'resources', 'icon.ico'),
+    join(process.resourcesPath, 'resources', 'tray.png'),
+    join(process.resourcesPath, 'resources', 'icon.ico'),
+    join(__dirname, '../../resources/tray.png'),
     join(__dirname, '../../resources/icon.ico')
   ]
 
@@ -35,6 +41,14 @@ export function createTray(): Tray {
   } catch {
     // Ignore
   }
+
+  tray.on('click', () => {
+    if (toggleShelfHandler) toggleShelfHandler()
+  })
+
+  tray.on('double-click', () => {
+    if (toggleShelfHandler) toggleShelfHandler(true)
+  })
 
   rebuildMenu()
 
@@ -64,6 +78,12 @@ function rebuildMenu(): void {
     {
       label: 'The Watcher • Port Monitor',
       enabled: false
+    },
+    {
+      label: '👉 Open Shelf',
+      click: () => {
+        if (toggleShelfHandler) toggleShelfHandler(true)
+      }
     },
     {
       label: lastPortCount > 0 ? `🟢 ${lastPortCount} active port${lastPortCount > 1 ? 's' : ''}` : '⚪ No active ports',

@@ -21,6 +21,13 @@ const bridge: WatcherBridge = {
     return () => {
       ipcRenderer.off('window:cursor-edge', listener)
     }
+  },
+  onToggleShelf: (callback: (forceOpen?: boolean) => void) => {
+    const listener = (_event: IpcRendererEvent, forceOpen?: boolean) => callback(forceOpen)
+    ipcRenderer.on('shelf:toggle', listener)
+    return () => {
+      ipcRenderer.off('shelf:toggle', listener)
+    }
   }
 }
 

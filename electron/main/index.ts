@@ -1,20 +1,51 @@
-import { app, ipcMain, shell } from 'electron'
+import { app, ipcMain, shell, Notification } from 'electron'
 import { join } from 'node:path'
 import { createWindow, setInteractive, sendToRenderer } from './window'
 import { startPortWatcher, stopPortWatcher, getActivePorts, killPort, setPortsListener } from './portWatcher'
-import { createTray, updateTrayPorts, destroyTray } from './tray'
+import { createTray, updateTrayPorts, destroyTray, setTrayToggleShelfHandler } from './tray'
 
 // Single instance lock
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
   app.quit()
+} else {
+  app.on('second-instance', () => {
+    // When launched again (e.g. from Start Menu / Desktop shortcut), open the shelf!
+    sendToRenderer('shelf:toggle', true)
+    setInteractive(true)
+  })
 }
 
 app.whenReady().then(() => {
   const win = createWindow()
 
+  // Initialize System Tray toggle handler
+  setTrayToggleShelfHandler((forceOpen) => {
+    sendToRenderer('shelf:toggle', forceOpen)
+    if (forceOpen) {
+      setInteractive(true)
+    }
+  })
+
   // Initialize System Tray
   createTray()
+
+  // Show a helpful desktop notification on first start
+  try {
+    if (Notification.isSupported()) {
+      const notif = new Notification({
+        title: 'The Watcher is active 🟢',
+        body: 'Running in the background. Move your mouse to the left screen edge to open.'
+      })
+      notif.on('click', () => {
+        sendToRenderer('shelf:toggle', true)
+        setInteractive(true)
+      })
+      notif.show()
+    }
+  } catch (err) {
+    console.error('[notif] Failed to show start notification:', err)
+  }
 
   // Load the renderer UI
   if (process.env.ELECTRON_RENDERER_URL) {

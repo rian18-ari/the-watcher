@@ -7,6 +7,7 @@ export interface WatcherBridge {
   setInteractive: (interactive: boolean) => Promise<void>
   onPortsUpdate: (callback: (ports: ActivePort[]) => void) => () => void
   onCursorEdge: (callback: (edge: { near: boolean; x: number; y: number }) => void) => () => void
+  onToggleShelf: (callback: (forceOpen?: boolean) => void) => () => void
 }
 
 export type EdgemonBridge = WatcherBridge
