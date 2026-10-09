@@ -3,7 +3,7 @@ import { usePortStore } from './usePortStore'
 
 const DWELL_MS = 90
 const GRACE_CLOSE_MS = 240
-const PANEL_WIDTH = 400
+const PANEL_WIDTH = 420
 
 export function useEdgeHover() {
   const isOpen = usePortStore((s) => s.isOpen)

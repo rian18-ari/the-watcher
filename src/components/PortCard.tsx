@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Globe, Square, Cpu, ShieldCheck } from 'lucide-react'
+import { ArrowUpRight, X, Shield } from 'lucide-react'
 import type { ActivePort } from '../../shared/types'
 import { usePortStore } from '../hooks/usePortStore'
 
@@ -21,6 +21,7 @@ export const PortCard: React.FC<PortCardProps> = ({ item }) => {
   const openUrl = usePortStore((s) => s.openUrl)
   const [elapsed, setElapsed] = useState(() => Date.now() - item.firstSeen)
   const [killing, setKilling] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,34 +41,39 @@ export const PortCard: React.FC<PortCardProps> = ({ item }) => {
   }
 
   const displayName = item.projectDirName || item.scriptName || item.processName
-  const secondaryName = item.projectDirName && item.scriptName ? item.scriptName : item.processName
+  const secondaryName = item.projectDirName && item.scriptName ? item.scriptName : null
 
   return (
     <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
-        background: item.isSystem ? 'rgba(22, 27, 34, 0.5)' : 'var(--bg-card)',
-        borderRadius: 'var(--radius-card)',
-        border: item.isSystem ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid var(--border-light)',
-        padding: '12px 14px',
+        width: '100%',
+        padding: '14px 20px',
+        boxSizing: 'border-box',
+        borderBottom: '1px solid var(--border-hairline)',
+        background: isHovered
+          ? 'rgba(255, 255, 255, 0.035)'
+          : 'transparent',
+        transition: 'background 0.2s ease',
         display: 'flex',
         flexDirection: 'column',
-        gap: '8px',
-        boxSizing: 'border-box',
-        width: '100%',
-        overflow: 'hidden'
+        gap: '9px',
+        position: 'relative'
       }}
     >
-      {/* Top row: Port + Names & Label + Action Buttons */}
+      {/* Top Line: Port & Project Name + Label Badge + Action Outline Buttons */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          gap: '10px',
           width: '100%',
           overflow: 'hidden'
         }}
       >
-        {/* Left: Port badge + Title + Label tag */}
+        {/* Left: Port Number + Project Title + Label */}
         <div
           style={{
             display: 'flex',
@@ -75,186 +81,170 @@ export const PortCard: React.FC<PortCardProps> = ({ item }) => {
             gap: '8px',
             minWidth: 0,
             flex: 1,
-            marginRight: '8px',
             overflow: 'hidden'
           }}
         >
-          {/* Port Badge */}
+          {/* Port Badge with Amber/Yellow Accent */}
           <div
             style={{
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 700,
+              fontSize: '13px',
+              letterSpacing: '-0.02em',
+              color: item.isSystem ? 'var(--text-secondary)' : 'var(--accent-yellow)',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '5px',
-              background: item.isSystem ? 'rgba(255, 255, 255, 0.06)' : 'rgba(34, 197, 94, 0.12)',
-              border: item.isSystem ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(34, 197, 94, 0.25)',
-              color: item.isSystem ? 'var(--text-secondary)' : 'var(--status-running)',
-              padding: '2px 7px',
-              borderRadius: '6px',
-              fontFamily: 'var(--font-mono)',
-              fontWeight: 600,
-              fontSize: '12px',
+              gap: '4px',
               flexShrink: 0
             }}
           >
-            {!item.isSystem && (
-              <span
-                style={{
-                  width: '5px',
-                  height: '5px',
-                  borderRadius: '50%',
-                  background: 'var(--status-running)',
-                  boxShadow: '0 0 6px var(--status-running)'
-                }}
-              />
-            )}
             <span>:{item.port}</span>
           </div>
 
-          {/* Titles & Label */}
-          <div
+          {/* Project / Command Name */}
+          <span
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              minWidth: 0,
-              flex: 1,
-              overflow: 'hidden'
+              fontWeight: 600,
+              fontSize: '13.5px',
+              color: 'var(--text-primary)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              letterSpacing: '-0.015em'
+            }}
+            title={displayName}
+          >
+            {displayName}
+          </span>
+
+          {/* Swiss Minimal Label: [ DEV ] or [ SYSTEM ] */}
+          <span
+            style={{
+              fontSize: '8.5px',
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              padding: '2px 5px',
+              borderRadius: '3px',
+              flexShrink: 0,
+              color: item.isSystem ? 'var(--text-tertiary)' : 'var(--accent-yellow)',
+              background: item.isSystem ? 'rgba(255, 255, 255, 0.06)' : 'var(--accent-yellow-dim)',
+              border: item.isSystem ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid var(--accent-yellow-border)'
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                minWidth: 0,
-                overflow: 'hidden'
-              }}
-            >
-              <span
-                style={{
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  color: item.isSystem ? 'var(--text-secondary)' : 'var(--text-primary)',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}
-                title={displayName}
-              >
-                {displayName}
-              </span>
-
-              {/* Tag Label next to app/web name */}
-              <span
-                style={{
-                  fontSize: '10px',
-                  padding: '1px 5px',
-                  borderRadius: '4px',
-                  fontWeight: 600,
-                  flexShrink: 0,
-                  background: item.isSystem ? 'rgba(255, 255, 255, 0.07)' : 'rgba(99, 102, 241, 0.15)',
-                  color: item.isSystem ? 'var(--text-tertiary)' : '#818cf8',
-                  border: item.isSystem ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(99, 102, 241, 0.25)'
-                }}
-              >
-                {item.isSystem ? 'System' : 'Dev'}
-              </span>
-            </div>
-
-            {secondaryName && secondaryName !== displayName && (
-              <div
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--text-tertiary)',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}
-                title={secondaryName}
-              >
-                {secondaryName}
-              </div>
-            )}
-          </div>
+            {item.isSystem ? 'System' : 'Dev'}
+          </span>
         </div>
 
-        {/* Right: Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+        {/* Right: Outline Wireframe Actions (Matching Reference Buttons) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+          {/* Open Button */}
           <button
             onClick={handleOpenBrowser}
             title={`Open http://localhost:${item.port}`}
             style={{
-              background: 'rgba(99, 102, 241, 0.15)',
-              border: '1px solid rgba(99, 102, 241, 0.3)',
-              color: '#818cf8',
-              borderRadius: '6px',
-              padding: '4px 7px',
-              cursor: 'pointer',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '3px',
-              fontSize: '11px',
-              fontWeight: 500
+              gap: '4px',
+              padding: '4px 9px',
+              borderRadius: 'var(--radius-btn)',
+              border: '1px solid var(--border-hairline)',
+              background: 'rgba(255, 255, 255, 0.03)',
+              color: 'var(--text-primary)',
+              fontSize: '10px',
+              fontWeight: 600,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-hairline)'
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'
             }}
           >
-            <Globe size={11} />
             <span>Open</span>
+            <ArrowUpRight size={11} strokeWidth={2.2} />
           </button>
 
+          {/* Kill / Protected Button */}
           {!item.isSystem ? (
             <button
               onClick={handleKill}
               disabled={killing}
-              title={`Kill PID ${item.pid} and free port ${item.port}`}
+              title={`Kill PID ${item.pid}`}
               style={{
-                background: 'rgba(239, 68, 68, 0.15)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                color: '#f87171',
-                borderRadius: '6px',
-                padding: '4px 7px',
-                cursor: killing ? 'not-allowed' : 'pointer',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '3px',
-                fontSize: '11px',
-                fontWeight: 500,
-                opacity: killing ? 0.5 : 1
+                padding: '4px 8px',
+                borderRadius: 'var(--radius-btn)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                background: 'rgba(239, 68, 68, 0.04)',
+                color: '#f87171',
+                fontSize: '10px',
+                fontWeight: 600,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                cursor: killing ? 'not-allowed' : 'pointer',
+                opacity: killing ? 0.4 : 1,
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!killing) {
+                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)'
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!killing) {
+                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.25)'
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.04)'
+                }
               }}
             >
-              <Square size={9} fill="#f87171" />
               <span>{killing ? '...' : 'Kill'}</span>
+              <X size={10} strokeWidth={2.2} />
             </button>
           ) : (
             <div
-              title="System process protected to prevent OS instability"
+              title="System process protected"
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '3px',
-                fontSize: '10.5px',
+                padding: '3px 7px',
+                borderRadius: 'var(--radius-btn)',
+                border: '1px solid rgba(255, 255, 255, 0.07)',
+                background: 'rgba(255, 255, 255, 0.02)',
                 color: 'var(--text-tertiary)',
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                padding: '3px 6px',
-                borderRadius: '5px'
+                fontSize: '9.5px',
+                fontWeight: 600,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase'
               }}
             >
-              <ShieldCheck size={11} color="var(--text-tertiary)" />
+              <Shield size={10} strokeWidth={2} />
               <span>OS</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Bottom row: Process info and duration */}
+      {/* Bottom Metadata Line: Script/Path + PID + Elapsed Timer */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          fontSize: '11px',
+          fontSize: '10.5px',
           color: 'var(--text-tertiary)',
-          borderTop: '1px solid var(--divider)',
-          paddingTop: '6px',
+          fontFamily: 'var(--font-mono)',
+          letterSpacing: '-0.01em',
           overflow: 'hidden'
         }}
       >
@@ -262,22 +252,26 @@ export const PortCard: React.FC<PortCardProps> = ({ item }) => {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '4px',
-            fontFamily: 'var(--font-mono)',
+            gap: '8px',
             minWidth: 0,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap'
           }}
-          title={`${item.processName} (PID ${item.pid})`}
         >
-          <Cpu size={11} style={{ flexShrink: 0 }} />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.processName}</span>
-          <span style={{ opacity: 0.5, flexShrink: 0 }}>(PID {item.pid})</span>
+          <span style={{ color: 'var(--text-secondary)' }}>{item.processName}</span>
+          <span style={{ opacity: 0.4 }}>/</span>
+          <span>PID {item.pid}</span>
+          {secondaryName && (
+            <>
+              <span style={{ opacity: 0.4 }}>/</span>
+              <span style={{ color: 'var(--text-muted)' }}>{secondaryName}</span>
+            </>
+          )}
         </div>
 
-        <div style={{ flexShrink: 0, fontSize: '10.5px', marginLeft: '6px' }}>
-          <span>{formatDuration(elapsed)}</span>
+        <div style={{ flexShrink: 0, fontSize: '10px', color: 'var(--text-muted)' }}>
+          {formatDuration(elapsed)}
         </div>
       </div>
     </div>
