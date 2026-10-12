@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="resources/icon.png" width="96" height="96" alt="The Watcher Logo" />
+</p>
+
 # The Watcher 🟢
 
 > **Lightweight, Zero-Config Screen-Edge HUD for Active Dev Ports & Background Servers.**

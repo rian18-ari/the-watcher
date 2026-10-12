@@ -1,5 +1,6 @@
 import React from 'react'
 import { usePortStore } from '../hooks/usePortStore'
+import { WatcherLogo } from './WatcherLogo'
 
 export const AsteriskIcon: React.FC<{ size?: number; color?: string }> = ({ size = 22, color = '#ffffff' }) => (
   <svg
@@ -35,7 +36,7 @@ export const Header: React.FC = () => {
         userSelect: 'none'
       }}
     >
-      {/* 1. Top Bar: Asterisk + 3-line typographic stamp + Minimal Hamburger lines */}
+      {/* 1. Top Bar: Official Logo + 3-line typographic stamp + Minimal Hamburger lines */}
       <div
         style={{
           display: 'flex',
@@ -46,7 +47,7 @@ export const Header: React.FC = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <AsteriskIcon size={22} color="#ffffff" />
+          <WatcherLogo size={26} variant="white" />
           <div
             style={{
               fontSize: '8.5px',

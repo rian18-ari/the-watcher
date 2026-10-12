@@ -2,7 +2,8 @@ import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { usePortStore } from './hooks/usePortStore'
 import { useEdgeHover } from './hooks/useEdgeHover'
-import { Header, AsteriskIcon } from './components/Header'
+import { Header } from './components/Header'
+import { WatcherLogo } from './components/WatcherLogo'
 import { PortCard } from './components/PortCard'
 
 export const App: React.FC = () => {
@@ -102,18 +103,18 @@ export const App: React.FC = () => {
             >
               <div
                 style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '12px',
-                  background: 'var(--accent-yellow-dim)',
-                  border: '1px solid var(--accent-yellow-border)',
+                  width: '54px',
+                  height: '54px',
+                  borderRadius: '14px',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  border: '1px solid var(--border-hairline)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 0 20px rgba(255, 184, 0, 0.08)'
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
                 }}
               >
-                <AsteriskIcon size={22} color="var(--accent-yellow)" />
+                <WatcherLogo size={32} variant="white" />
               </div>
 
               <div>
