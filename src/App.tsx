@@ -59,24 +59,24 @@ export const App: React.FC = () => {
           width: '420px',
           maxWidth: '100%',
           height: '100vh',
-          background: 'radial-gradient(ellipse 360px 220px at bottom left, rgba(234, 88, 12, 0.09), transparent 75%), var(--bg-deep)',
+          background: 'var(--bg-deep)',
           backdropFilter: 'blur(30px)',
           WebkitBackdropFilter: 'blur(30px)',
-          borderRight: '1px solid var(--border-hairline)',
+          borderRight: '1px solid var(--border-subtle)',
           borderTopRightRadius: 'var(--radius-panel)',
           borderBottomRightRadius: 'var(--radius-panel)',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: isOpen ? '0 16px 50px rgba(0, 0, 0, 0.75), 0 0 1px rgba(255, 255, 255, 0.2)' : 'none',
+          boxShadow: isOpen ? '0 16px 50px rgba(0, 0, 0, 0.75), 0 0 1px rgba(255, 255, 255, 0.15)' : 'none',
           pointerEvents: 'auto',
           boxSizing: 'border-box',
           overflowX: 'hidden'
         }}
       >
-        {/* Editorial Header */}
+        {/* Header from Reference */}
         <Header />
 
-        {/* Scrollable Port Rows List */}
+        {/* Scrollable Cards List */}
         <div
           style={{
             flex: 1,
@@ -84,6 +84,8 @@ export const App: React.FC = () => {
             overflowX: 'hidden',
             display: 'flex',
             flexDirection: 'column',
+            gap: '14px',
+            padding: '0 24px 28px 24px',
             boxSizing: 'border-box'
           }}
         >
@@ -96,65 +98,50 @@ export const App: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 textAlign: 'center',
-                padding: '40px 28px',
+                padding: '40px 20px',
                 color: 'var(--text-secondary)',
                 gap: '16px'
               }}
             >
               <div
                 style={{
-                  width: '54px',
-                  height: '54px',
-                  borderRadius: '14px',
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '18px',
                   background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid var(--border-hairline)',
+                  border: '1px solid var(--border-subtle)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
+                  boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3)'
                 }}
               >
-                <WatcherLogo size={32} variant="white" />
+                <WatcherLogo size={36} variant="white" />
               </div>
 
               <div>
                 <div
                   style={{
                     fontWeight: 700,
-                    fontSize: '16px',
+                    fontSize: '17px',
                     color: 'var(--text-primary)',
                     letterSpacing: '-0.02em',
                     marginBottom: '6px'
                   }}
                 >
-                  No Active Ports
+                  No active ports
                 </div>
                 <div
                   style={{
-                    fontSize: '11.5px',
+                    fontSize: '12.5px',
                     color: 'var(--text-tertiary)',
-                    lineHeight: 1.55,
-                    maxWidth: '280px',
+                    lineHeight: 1.5,
+                    maxWidth: '260px',
                     margin: '0 auto'
                   }}
                 >
-                  Listening on localhost sockets (:3000, :5173, :8080, ...). Run any dev server or background script in terminal to track it here.
+                  Run <code>npm run dev</code> or any local server in terminal to automatically track it here.
                 </div>
-              </div>
-
-              <div
-                style={{
-                  border: '1px solid var(--border-hairline)',
-                  borderRadius: 'var(--radius-btn)',
-                  padding: '4px 10px',
-                  fontSize: '9px',
-                  fontFamily: 'var(--font-mono)',
-                  letterSpacing: '0.08em',
-                  color: 'var(--text-muted)',
-                  textTransform: 'uppercase'
-                }}
-              >
-                SCANNING LOCALHOST • 2s
               </div>
             </div>
           ) : (
@@ -162,37 +149,6 @@ export const App: React.FC = () => {
               <PortCard key={`${portItem.port}-${portItem.pid}`} item={portItem} />
             ))
           )}
-        </div>
-
-        {/* Editorial Footer Strip */}
-        <div
-          style={{
-            borderTop: '1px solid var(--border-hairline)',
-            padding: '10px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: '9px',
-            fontFamily: 'var(--font-mono)',
-            color: 'var(--text-muted)',
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            flexShrink: 0,
-            background: 'rgba(0, 0, 0, 0.2)'
-          }}
-        >
-          <div>THE WATCHER.© 2026</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span
-              style={{
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                background: 'var(--accent-yellow)'
-              }}
-            />
-            <span>EDGE HUD ACTIVE</span>
-          </div>
         </div>
       </motion.aside>
     </div>

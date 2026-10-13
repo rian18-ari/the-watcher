@@ -1,34 +1,32 @@
 :root {
-  /* Editorial Swiss Dark Theme (Inspired by Reference) */
-  --bg-deep: rgba(12, 12, 12, 0.94);
-  --bg-card: rgba(22, 22, 22, 0.7);
-  --bg-card-hover: rgba(32, 32, 32, 0.95);
-  --bg-surface: rgba(18, 18, 18, 0.9);
+  /* The Watcher - Reference Design Tokens */
+  --bg-deep: rgba(14, 16, 20, 0.96);
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --bg-card-hover: rgba(255, 255, 255, 0.065);
 
-  /* Hairlines & Borders */
-  --border-hairline: rgba(255, 255, 255, 0.12);
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-active: rgba(255, 255, 255, 0.28);
-  --divider: rgba(255, 255, 255, 0.1);
+  /* Borders */
+  --border-card: rgba(255, 255, 255, 0.18);
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-pill-white: rgba(255, 255, 255, 0.9);
 
-  /* Reference Signature Accent Colors */
-  --accent-yellow: #FFB800;
-  --accent-yellow-dim: rgba(255, 184, 0, 0.14);
-  --accent-yellow-border: rgba(255, 184, 0, 0.35);
+  /* Action Buttons Accent (Cyan & Red from Reference) */
+  --accent-cyan: #38bdf8;
+  --accent-cyan-border: rgba(56, 189, 248, 0.65);
+  --accent-cyan-bg: rgba(56, 189, 248, 0.08);
 
-  --accent-orange: #EA580C;
-  --accent-orange-glow: rgba(234, 88, 12, 0.15);
+  --accent-red: #f87171;
+  --accent-red-border: rgba(248, 113, 113, 0.65);
+  --accent-red-bg: rgba(248, 113, 113, 0.08);
 
-  /* Status Colors */
-  --status-running: #22c55e;
-  --status-running-glow: rgba(34, 197, 94, 0.25);
-  --status-killed: #ef4444;
+  /* OS Badge (System processes) */
+  --badge-os-bg: rgba(255, 255, 255, 0.2);
+  --badge-os-text: #ffffff;
 
   /* Typography Colors */
   --text-primary: #FFFFFF;
-  --text-secondary: #A1A1AA;
-  --text-tertiary: #71717A;
-  --text-muted: #52525B;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --text-muted: #6b7280;
 
   /* Typography */
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -36,8 +34,7 @@
 
   /* Radii */
   --radius-panel: 24px;
-  --radius-card: 10px;
-  --radius-btn: 6px;
+  --radius-card: 20px;
   --radius-pill: 9999px;
 
   /* Dimensions */

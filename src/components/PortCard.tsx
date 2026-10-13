@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { ArrowUpRight, X, Shield } from 'lucide-react'
+import { ArrowUpRight, ChevronUp, Shield } from 'lucide-react'
 import type { ActivePort } from '../../shared/types'
 import { usePortStore } from '../hooks/usePortStore'
 
@@ -8,12 +8,21 @@ interface PortCardProps {
 }
 
 function formatDuration(ms: number): string {
-  const sec = Math.floor(ms / 1000)
-  if (sec < 60) return `${sec}s`
-  const min = Math.floor(sec / 60)
-  if (min < 60) return `${min}m`
+  const totalSec = Math.max(0, Math.floor(ms / 1000))
+  if (totalSec < 60) return `${totalSec}s`
+  const min = Math.floor(totalSec / 60)
+  const sec = totalSec % 60
+  if (min < 60) {
+    return sec > 0 ? `${min}m ${sec}s` : `${min}m`
+  }
   const hr = Math.floor(min / 60)
-  return `${hr}h ${min % 60}m`
+  const remMin = min % 60
+  if (hr < 24) {
+    return remMin > 0 ? `${hr}h ${remMin}m` : `${hr}h`
+  }
+  const days = Math.floor(hr / 24)
+  const remHr = hr % 24
+  return remHr > 0 ? `${days}d ${remHr}h` : `${days}d`
 }
 
 export const PortCard: React.FC<PortCardProps> = ({ item }) => {
@@ -41,7 +50,13 @@ export const PortCard: React.FC<PortCardProps> = ({ item }) => {
   }
 
   const displayName = item.projectDirName || item.scriptName || item.processName
-  const secondaryName = item.projectDirName && item.scriptName ? item.scriptName : null
+  const secondaryDetail = item.isSystem
+    ? item.processName
+    : item.projectDirName && item.scriptName
+      ? item.scriptName
+      : item.processName !== displayName
+        ? item.processName
+        : null
 
   return (
     <div
@@ -49,202 +64,180 @@ export const PortCard: React.FC<PortCardProps> = ({ item }) => {
       onMouseLeave={() => setIsHovered(false)}
       style={{
         width: '100%',
-        padding: '14px 20px',
+        padding: '18px 20px 16px 20px',
         boxSizing: 'border-box',
-        borderBottom: '1px solid var(--border-hairline)',
-        background: isHovered
-          ? 'rgba(255, 255, 255, 0.035)'
-          : 'transparent',
-        transition: 'background 0.2s ease',
+        borderRadius: 'var(--radius-card)',
+        background: isHovered ? 'var(--bg-card-hover)' : 'var(--bg-card)',
+        border: `1.2px solid ${isHovered ? 'rgba(255, 255, 255, 0.28)' : 'var(--border-card)'}`,
+        transition: 'all 0.18s ease',
         display: 'flex',
         flexDirection: 'column',
-        gap: '9px',
+        gap: '16px',
+        boxShadow: isHovered ? '0 8px 24px rgba(0, 0, 0, 0.35)' : 'none',
         position: 'relative'
       }}
     >
-      {/* Top Line: Port & Project Name + Label Badge + Action Outline Buttons */}
+      {/* Top Row: Name + Port on Left | Action Pill Buttons on Right */}
       <div
         style={{
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'space-between',
-          gap: '10px',
-          width: '100%',
-          overflow: 'hidden'
+          gap: '12px',
+          width: '100%'
         }}
       >
-        {/* Left: Port Number + Project Title + Label */}
+        {/* Left: Process/Project Name & Port */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: 0,
+            flex: 1
+          }}
+        >
+          <div
+            style={{
+              fontSize: '22px',
+              fontWeight: 700,
+              lineHeight: 1.18,
+              letterSpacing: '-0.02em',
+              color: 'var(--text-primary)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+            title={displayName}
+          >
+            {displayName}
+          </div>
+
+          <div
+            style={{
+              fontSize: '17px',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              marginTop: '4px',
+              letterSpacing: '-0.01em'
+            }}
+          >
+            : {item.port}
+          </div>
+        </div>
+
+        {/* Right: Actions (Pill buttons matching reference) */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            minWidth: 0,
-            flex: 1,
-            overflow: 'hidden'
+            flexShrink: 0,
+            paddingTop: '2px'
           }}
         >
-          {/* Port Badge with Amber/Yellow Accent */}
-          <div
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontWeight: 700,
-              fontSize: '13px',
-              letterSpacing: '-0.02em',
-              color: item.isSystem ? 'var(--text-secondary)' : 'var(--accent-yellow)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              flexShrink: 0
-            }}
-          >
-            <span>:{item.port}</span>
-          </div>
-
-          {/* Project / Command Name */}
-          <span
-            style={{
-              fontWeight: 600,
-              fontSize: '13.5px',
-              color: 'var(--text-primary)',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              letterSpacing: '-0.015em'
-            }}
-            title={displayName}
-          >
-            {displayName}
-          </span>
-
-          {/* Swiss Minimal Label: [ DEV ] or [ SYSTEM ] */}
-          <span
-            style={{
-              fontSize: '8.5px',
-              fontWeight: 700,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              padding: '2px 5px',
-              borderRadius: '3px',
-              flexShrink: 0,
-              color: item.isSystem ? 'var(--text-tertiary)' : 'var(--accent-yellow)',
-              background: item.isSystem ? 'rgba(255, 255, 255, 0.06)' : 'var(--accent-yellow-dim)',
-              border: item.isSystem ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid var(--accent-yellow-border)'
-            }}
-          >
-            {item.isSystem ? 'System' : 'Dev'}
-          </span>
-        </div>
-
-        {/* Right: Outline Wireframe Actions (Matching Reference Buttons) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-          {/* Open Button */}
-          <button
-            onClick={handleOpenBrowser}
-            title={`Open http://localhost:${item.port}`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 9px',
-              borderRadius: 'var(--radius-btn)',
-              border: '1px solid var(--border-hairline)',
-              background: 'rgba(255, 255, 255, 0.03)',
-              color: 'var(--text-primary)',
-              fontSize: '10px',
-              fontWeight: 600,
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--border-hairline)'
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'
-            }}
-          >
-            <span>Open</span>
-            <ArrowUpRight size={11} strokeWidth={2.2} />
-          </button>
-
-          {/* Kill / Protected Button */}
           {!item.isSystem ? (
-            <button
-              onClick={handleKill}
-              disabled={killing}
-              title={`Kill PID ${item.pid}`}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px',
-                padding: '4px 8px',
-                borderRadius: 'var(--radius-btn)',
-                border: '1px solid rgba(239, 68, 68, 0.25)',
-                background: 'rgba(239, 68, 68, 0.04)',
-                color: '#f87171',
-                fontSize: '10px',
-                fontWeight: 600,
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-                cursor: killing ? 'not-allowed' : 'pointer',
-                opacity: killing ? 0.4 : 1,
-                transition: 'all 0.15s ease'
-              }}
-              onMouseEnter={(e) => {
-                if (!killing) {
-                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)'
-                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!killing) {
-                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.25)'
-                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.04)'
-                }
-              }}
-            >
-              <span>{killing ? '...' : 'Kill'}</span>
-              <X size={10} strokeWidth={2.2} />
-            </button>
+            <>
+              {/* Open Pill Button (Cyan border) */}
+              <button
+                onClick={handleOpenBrowser}
+                title={`Open http://localhost:${item.port}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  padding: '4px 12px',
+                  borderRadius: 'var(--radius-pill)',
+                  border: '1.2px solid var(--accent-cyan-border)',
+                  background: 'var(--accent-cyan-bg)',
+                  color: 'var(--accent-cyan)',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--accent-cyan)'
+                  e.currentTarget.style.background = 'rgba(56, 189, 248, 0.18)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--accent-cyan-border)'
+                  e.currentTarget.style.background = 'var(--accent-cyan-bg)'
+                }}
+              >
+                <span>Open</span>
+                <ArrowUpRight size={13} strokeWidth={2.4} />
+              </button>
+
+              {/* Kill Pill Button (Red border) */}
+              <button
+                onClick={handleKill}
+                disabled={killing}
+                title={`Kill PID ${item.pid}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  padding: '4px 12px',
+                  borderRadius: 'var(--radius-pill)',
+                  border: '1.2px solid var(--accent-red-border)',
+                  background: 'var(--accent-red-bg)',
+                  color: 'var(--accent-red)',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: killing ? 'not-allowed' : 'pointer',
+                  opacity: killing ? 0.45 : 1,
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (!killing) {
+                    e.currentTarget.style.borderColor = 'var(--accent-red)'
+                    e.currentTarget.style.background = 'rgba(248, 113, 113, 0.18)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!killing) {
+                    e.currentTarget.style.borderColor = 'var(--accent-red-border)'
+                    e.currentTarget.style.background = 'var(--accent-red-bg)'
+                  }
+                }}
+              >
+                <span>{killing ? '...' : 'Kill'}</span>
+                <ChevronUp size={13} strokeWidth={2.4} />
+              </button>
+            </>
           ) : (
+            /* System OS Protected Pill Badge */
             <div
-              title="System process protected"
+              title="Protected System Process"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '3px',
-                padding: '3px 7px',
-                borderRadius: 'var(--radius-btn)',
-                border: '1px solid rgba(255, 255, 255, 0.07)',
-                background: 'rgba(255, 255, 255, 0.02)',
-                color: 'var(--text-tertiary)',
-                fontSize: '9.5px',
+                gap: '5px',
+                padding: '4px 12px',
+                borderRadius: 'var(--radius-pill)',
+                background: 'var(--badge-os-bg)',
+                color: 'var(--badge-os-text)',
+                fontSize: '12.5px',
                 fontWeight: 600,
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase'
+                letterSpacing: '0.02em'
               }}
             >
-              <Shield size={10} strokeWidth={2} />
+              <Shield size={13} strokeWidth={2.2} fill="currentColor" />
               <span>OS</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Bottom Metadata Line: Script/Path + PID + Elapsed Timer */}
+      {/* Bottom Row: PID / Process Detail on Left | Elapsed Duration on Right */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          fontSize: '10.5px',
+          fontSize: '12.5px',
           color: 'var(--text-tertiary)',
-          fontFamily: 'var(--font-mono)',
-          letterSpacing: '-0.01em',
+          width: '100%',
           overflow: 'hidden'
         }}
       >
@@ -259,18 +252,32 @@ export const PortCard: React.FC<PortCardProps> = ({ item }) => {
             whiteSpace: 'nowrap'
           }}
         >
-          <span style={{ color: 'var(--text-secondary)' }}>{item.processName}</span>
-          <span style={{ opacity: 0.4 }}>/</span>
           <span>PID {item.pid}</span>
-          {secondaryName && (
+          {secondaryDetail && (
             <>
-              <span style={{ opacity: 0.4 }}>/</span>
-              <span style={{ color: 'var(--text-muted)' }}>{secondaryName}</span>
+              <span style={{ opacity: 0.5 }}>/</span>
+              <span
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+                title={secondaryDetail}
+              >
+                {secondaryDetail}
+              </span>
             </>
           )}
         </div>
 
-        <div style={{ flexShrink: 0, fontSize: '10px', color: 'var(--text-muted)' }}>
+        <div
+          style={{
+            flexShrink: 0,
+            marginLeft: '8px',
+            fontSize: '12.5px',
+            color: 'var(--text-tertiary)'
+          }}
+        >
           {formatDuration(elapsed)}
         </div>
       </div>
