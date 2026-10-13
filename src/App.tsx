@@ -105,9 +105,9 @@ export const App: React.FC = () => {
             >
               <div
                 style={{
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '18px',
+                  width: '84px',
+                  height: '58px',
+                  borderRadius: '16px',
                   background: 'rgba(255, 255, 255, 0.04)',
                   border: '1px solid var(--border-subtle)',
                   display: 'flex',
@@ -116,7 +116,7 @@ export const App: React.FC = () => {
                   boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3)'
                 }}
               >
-                <WatcherLogo size={36} variant="white" />
+                <WatcherLogo height={32} variant="white" />
               </div>
 
               <div>

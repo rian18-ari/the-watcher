@@ -29,7 +29,7 @@ export const Header: React.FC = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <WatcherLogo size={36} variant="white" />
+          <WatcherLogo height={42} variant="white" />
         </div>
 
         {/* Pill Badge: "2 ports" / "0 ports" */}

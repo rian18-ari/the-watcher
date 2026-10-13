@@ -3,6 +3,8 @@ import logoWhite from '../assets/logo-white.png'
 import logoBlack from '../assets/logo-black.png'
 
 interface WatcherLogoProps {
+  width?: number
+  height?: number
   size?: number
   variant?: 'white' | 'black'
   className?: string
@@ -10,23 +12,29 @@ interface WatcherLogoProps {
 }
 
 export const WatcherLogo: React.FC<WatcherLogoProps> = ({
-  size = 24,
+  width,
+  height,
+  size,
   variant = 'white',
   className,
   style
 }) => {
   const src = variant === 'white' ? logoWhite : logoBlack
 
+  // Aspect ratio of the cropped logo is 1.668:1
+  const finalHeight = height || size || 38
+  const finalWidth = width || Math.round(finalHeight * 1.668)
+
   return (
     <img
       src={src}
       alt="The Watcher Logo"
-      width={size}
-      height={size}
+      width={finalWidth}
+      height={finalHeight}
       className={className}
       style={{
-        width: `${size}px`,
-        height: `${size}px`,
+        width: `${finalWidth}px`,
+        height: `${finalHeight}px`,
         objectFit: 'contain',
         display: 'inline-block',
         flexShrink: 0,
