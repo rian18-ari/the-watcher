@@ -27,7 +27,9 @@
     "files": [
       "out/**/*",
       "resources/**/*",
-      "package.json"
+      "package.json",
+      "node_modules/koffi/**/*",
+      "node_modules/@koromix/**/*"
     ],
     "extraResources": [
       {
@@ -36,8 +38,10 @@
       }
     ],
     "asarUnpack": [
-      "**/*.{node,dll}",
-      "**/node_modules/koffi/**/*"
+      "**/*.node",
+      "**/*.dll",
+      "**/node_modules/koffi/**/*",
+      "**/node_modules/@koromix/**/*"
     ],
     "win": {
       "target": [

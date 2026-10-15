@@ -1,8 +1,14 @@
 import { BrowserWindow, screen, powerMonitor, app } from 'electron'
 import { join } from 'node:path'
-import koffi from 'koffi'
 import type { WatcherSettings } from '../../shared/types'
 import { DEFAULT_SETTINGS } from '../../shared/types'
+
+let koffi: any = null
+try {
+  koffi = require('koffi')
+} catch (err) {
+  console.warn('[window] Koffi native addon could not be loaded:', err)
+}
 
 export const PANEL_WIDTH = 420
 export const HOT_ZONE_WIDTH = 4
@@ -19,7 +25,7 @@ let GetForegroundWindowFn: (() => number | bigint) | null = null
 let GetWindowRectFn: ((hWnd: number | bigint, lpRect: any) => boolean) | null = null
 let GetShellWindowFn: (() => number | bigint) | null = null
 
-if (process.platform === 'win32') {
+if (process.platform === 'win32' && koffi) {
   try {
     const shell32 = koffi.load('shell32.dll')
     SHQueryUserNotificationStateFn = shell32.func('int SHQueryUserNotificationState(_Out_ int *pquns)')
@@ -147,8 +153,12 @@ export function sendToRenderer(channel: string, ...args: unknown[]): void {
 }
 
 export function setInteractive(value: boolean): void {
-  if (!mainWindow || mainWindow.isDestroyed() || interactive === value) return
+  if (!mainWindow || mainWindow.isDestroyed()) return
   interactive = value
+
+  if (!mainWindow.isVisible()) {
+    mainWindow.show()
+  }
 
   if (value) {
     mainWindow.setIgnoreMouseEvents(false)
@@ -259,10 +269,17 @@ export function createWindow(): BrowserWindow {
   mainWindow.setAlwaysOnTop(true, 'screen-saver')
   applyNoActivateStyle(mainWindow)
 
-  mainWindow.once('ready-to-show', () => {
-    mainWindow?.show()
+  let shown = false
+  const showWindow = (): void => {
+    if (shown || !mainWindow || mainWindow.isDestroyed()) return
+    shown = true
+    mainWindow.show()
     restartPollTimer(POLL_FAST_MS)
-  })
+  }
+
+  mainWindow.once('ready-to-show', showWindow)
+  // Ensure polling starts and window is displayed even if ready-to-show was missed
+  setTimeout(showWindow, 400)
 
   return mainWindow
 }

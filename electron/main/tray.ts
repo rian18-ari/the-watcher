@@ -18,47 +18,69 @@ export function setTrayNavigateHandler(handler: (view: 'services' | 'settings') 
 }
 
 function getTrayIcon(): NativeImage {
-  const candidates = [
-    join(app.getAppPath(), 'resources', 'tray.png'),
-    join(app.getAppPath(), 'resources', 'icon.ico'),
-    join(process.resourcesPath, 'resources', 'tray.png'),
-    join(process.resourcesPath, 'resources', 'icon.ico'),
-    join(__dirname, '../../resources/tray.png'),
-    join(__dirname, '../../resources/icon.ico')
-  ]
+  const isWin = process.platform === 'win32'
+  const candidates = isWin
+    ? [
+        join(app.getAppPath(), 'resources', 'icon.ico'),
+        join(process.resourcesPath, 'resources', 'icon.ico'),
+        join(__dirname, '../../resources/icon.ico'),
+        join(app.getAppPath(), 'resources', 'icon.png'),
+        join(process.resourcesPath, 'resources', 'icon.png'),
+        join(__dirname, '../../resources/icon.png'),
+        join(app.getAppPath(), 'resources', 'tray.png'),
+        join(process.resourcesPath, 'resources', 'tray.png'),
+        join(__dirname, '../../resources/tray.png')
+      ]
+    : [
+        join(app.getAppPath(), 'resources', 'tray.png'),
+        join(process.resourcesPath, 'resources', 'tray.png'),
+        join(__dirname, '../../resources/tray.png'),
+        join(app.getAppPath(), 'resources', 'icon.png'),
+        join(process.resourcesPath, 'resources', 'icon.png'),
+        join(__dirname, '../../resources/icon.png')
+      ]
 
   for (const p of candidates) {
     if (existsSync(p)) {
       const img = nativeImage.createFromPath(p)
-      if (!img.isEmpty()) return img
+      if (!img.isEmpty()) {
+        console.log('[tray] Loaded tray icon from:', p)
+        return img
+      }
     }
   }
 
+  console.warn('[tray] No suitable icon file found, falling back to empty image')
   return nativeImage.createEmpty()
 }
 
-export function createTray(): Tray {
+export function createTray(): Tray | null {
   if (tray) return tray
 
-  const icon = getTrayIcon()
-  tray = new Tray(icon)
   try {
-    tray.setToolTip('The Watcher')
-  } catch {
-    // Ignore
+    const icon = getTrayIcon()
+    tray = new Tray(icon)
+    try {
+      tray.setToolTip('The Watcher')
+    } catch {
+      // Ignore
+    }
+
+    tray.on('click', () => {
+      if (toggleShelfHandler) toggleShelfHandler()
+    })
+
+    tray.on('double-click', () => {
+      if (toggleShelfHandler) toggleShelfHandler(true)
+    })
+
+    rebuildMenu()
+    console.log('[tray] System tray successfully created')
+    return tray
+  } catch (err) {
+    console.error('[tray] Failed to create system tray:', err)
+    return null
   }
-
-  tray.on('click', () => {
-    if (toggleShelfHandler) toggleShelfHandler()
-  })
-
-  tray.on('double-click', () => {
-    if (toggleShelfHandler) toggleShelfHandler(true)
-  })
-
-  rebuildMenu()
-
-  return tray
 }
 
 export function updateTrayPorts(count: number): void {

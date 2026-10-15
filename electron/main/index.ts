@@ -1,9 +1,26 @@
 import { app, ipcMain, shell, Notification } from 'electron'
 import { join } from 'node:path'
-import { createWindow, setInteractive, sendToRenderer, setWindowSettings } from './window'
+import { appendFileSync } from 'node:fs'
+import { createWindow, getMainWindow, setInteractive, sendToRenderer, setWindowSettings } from './window'
 import { startPortWatcher, stopPortWatcher, restartPortWatcher, getActivePorts, killPort, setPortsListener } from './portWatcher'
 import { createTray, updateTrayPorts, destroyTray, setTrayToggleShelfHandler, setTrayNavigateHandler, rebuildMenu } from './tray'
 import { initSettings, getSettings, saveSettings, onSettingsChanged } from './settings'
+
+process.on('uncaughtException', (err) => {
+  try {
+    const logPath = join(app.getPath('userData'), 'crash.log')
+    appendFileSync(logPath, `[${new Date().toISOString()}] Uncaught Exception: ${err.stack || err}\n`)
+  } catch {}
+  console.error('[fatal] Uncaught Exception:', err)
+})
+
+process.on('unhandledRejection', (reason) => {
+  try {
+    const logPath = join(app.getPath('userData'), 'crash.log')
+    appendFileSync(logPath, `[${new Date().toISOString()}] Unhandled Rejection: ${reason}\n`)
+  } catch {}
+  console.error('[fatal] Unhandled Rejection:', reason)
+})
 
 // Single instance lock
 const gotTheLock = app.requestSingleInstanceLock()
@@ -12,6 +29,12 @@ if (!gotTheLock) {
 } else {
   app.on('second-instance', () => {
     // When launched again (e.g. from Start Menu / Desktop shortcut), open the shelf!
+    const win = getMainWindow()
+    if (win && !win.isDestroyed()) {
+      if (win.isMinimized()) win.restore()
+      if (!win.isVisible()) win.show()
+      win.setAlwaysOnTop(true, 'screen-saver')
+    }
     sendToRenderer('shelf:toggle', true)
     setInteractive(true)
   })
