@@ -1,33 +1,40 @@
 import { app, ipcMain, shell, Notification } from 'electron'
 import { join } from 'node:path'
-import { appendFileSync } from 'node:fs'
+import { appendFileSync, writeFileSync } from 'node:fs'
 import { createWindow, getMainWindow, setInteractive, sendToRenderer, setWindowSettings } from './window'
 import { startPortWatcher, stopPortWatcher, restartPortWatcher, getActivePorts, killPort, setPortsListener } from './portWatcher'
 import { createTray, updateTrayPorts, destroyTray, setTrayToggleShelfHandler, setTrayNavigateHandler, rebuildMenu } from './tray'
 import { initSettings, getSettings, saveSettings, onSettingsChanged } from './settings'
 
-process.on('uncaughtException', (err) => {
+const STARTUP_LOG = 'C:\\proyek\\edgemon\\startup.log'
+function logStartup(msg: string): void {
   try {
-    const logPath = join(app.getPath('userData'), 'crash.log')
-    appendFileSync(logPath, `[${new Date().toISOString()}] Uncaught Exception: ${err.stack || err}\n`)
+    appendFileSync(STARTUP_LOG, `[${new Date().toISOString()}] (PID ${process.pid}) ${msg}\n`)
   } catch {}
-  console.error('[fatal] Uncaught Exception:', err)
+}
+
+logStartup(`Process launched: argv=${JSON.stringify(process.argv)}`)
+
+process.on('uncaughtException', (err) => {
+  logStartup(`Uncaught Exception: ${err.stack || err}`)
 })
 
-process.on('unhandledRejection', (reason) => {
-  try {
-    const logPath = join(app.getPath('userData'), 'crash.log')
-    appendFileSync(logPath, `[${new Date().toISOString()}] Unhandled Rejection: ${reason}\n`)
-  } catch {}
-  console.error('[fatal] Unhandled Rejection:', reason)
+process.on('unhandledRejection', (reason: any) => {
+  logStartup(`Unhandled Rejection: ${reason?.stack || reason}`)
 })
+
+app.name = 'The Watcher'
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.thewatcher.app')
+}
 
 // Single instance lock
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
-  app.quit()
+  app.exit(0)
 } else {
   app.on('second-instance', () => {
+    logStartup('second-instance event received')
     // When launched again (e.g. from Start Menu / Desktop shortcut), open the shelf!
     const win = getMainWindow()
     if (win && !win.isDestroyed()) {
@@ -43,6 +50,7 @@ if (!gotTheLock) {
 let knownPorts = new Set<number>()
 
 app.whenReady().then(() => {
+  logStartup('app.whenReady() triggered')
   // Initialize settings
   const settings = initSettings()
   setWindowSettings(settings)
