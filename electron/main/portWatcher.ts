@@ -251,6 +251,11 @@ export function startPortWatcher(intervalMs = 2000): void {
   console.log(`[portWatcher] Background port scanner started (interval ${intervalMs}ms)`)
 }
 
+export function restartPortWatcher(intervalMs = 2000): void {
+  stopPortWatcher()
+  startPortWatcher(intervalMs)
+}
+
 export function stopPortWatcher(): void {
   if (pollTimer) {
     clearInterval(pollTimer)

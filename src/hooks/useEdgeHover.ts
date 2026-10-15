@@ -22,10 +22,11 @@ export function useEdgeHover() {
       // 1. Opening logic: cursor hits the very edge
       if (edge.near) {
         if (!isOpenRef.current && dwellTimerRef.current === null) {
+          const dwell = usePortStore.getState().settings.dwellDelay || DWELL_MS
           dwellTimerRef.current = window.setTimeout(() => {
             setIsOpen(true)
             dwellTimerRef.current = null
-          }, DWELL_MS)
+          }, dwell)
         }
         // Cancel any pending close timer
         if (graceTimerRef.current !== null) {

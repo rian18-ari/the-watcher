@@ -2,13 +2,19 @@ import { Tray, Menu, app, nativeImage } from 'electron'
 import type { NativeImage } from 'electron'
 import { join } from 'node:path'
 import { existsSync } from 'node:fs'
+import { saveSettings } from './settings'
 
 let tray: Tray | null = null
 let lastPortCount = 0
 let toggleShelfHandler: ((forceOpen?: boolean) => void) | null = null
+let navigateHandler: ((view: 'services' | 'settings') => void) | null = null
 
 export function setTrayToggleShelfHandler(handler: (forceOpen?: boolean) => void): void {
   toggleShelfHandler = handler
+}
+
+export function setTrayNavigateHandler(handler: (view: 'services' | 'settings') => void): void {
+  navigateHandler = handler
 }
 
 function getTrayIcon(): NativeImage {
@@ -68,7 +74,7 @@ export function updateTrayPorts(count: number): void {
   rebuildMenu()
 }
 
-function rebuildMenu(): void {
+export function rebuildMenu(): void {
   if (!tray || tray.isDestroyed()) return
 
   const loginSettings = app.getLoginItemSettings()
@@ -83,6 +89,14 @@ function rebuildMenu(): void {
       label: '👉 Open Shelf',
       click: () => {
         if (toggleShelfHandler) toggleShelfHandler(true)
+        if (navigateHandler) navigateHandler('services')
+      }
+    },
+    {
+      label: '⚙️ Settings',
+      click: () => {
+        if (toggleShelfHandler) toggleShelfHandler(true)
+        if (navigateHandler) navigateHandler('settings')
       }
     },
     {
@@ -96,11 +110,7 @@ function rebuildMenu(): void {
       checked: isAutoStart,
       click: () => {
         const nextState = !isAutoStart
-        app.setLoginItemSettings({
-          openAtLogin: nextState,
-          path: process.execPath,
-          args: ['--hidden']
-        })
+        saveSettings({ autoStartOnBoot: nextState })
         rebuildMenu()
       }
     },

@@ -1,13 +1,16 @@
-import type { ActivePort } from './types'
+import type { ActivePort, WatcherSettings } from './types'
 
 export interface WatcherBridge {
   loadState: () => Promise<{ ports: ActivePort[] }>
   killPort: (pid: number) => Promise<boolean>
   openUrl: (url: string) => Promise<void>
   setInteractive: (interactive: boolean) => Promise<void>
+  getSettings: () => Promise<WatcherSettings>
+  saveSettings: (settings: Partial<WatcherSettings>) => Promise<WatcherSettings>
   onPortsUpdate: (callback: (ports: ActivePort[]) => void) => () => void
   onCursorEdge: (callback: (edge: { near: boolean; x: number; y: number }) => void) => () => void
   onToggleShelf: (callback: (forceOpen?: boolean) => void) => () => void
+  onNavigate: (callback: (view: 'services' | 'settings') => void) => () => void
 }
 
 export type EdgemonBridge = WatcherBridge

@@ -1,8 +1,9 @@
 import { app, ipcMain, shell, Notification } from 'electron'
 import { join } from 'node:path'
-import { createWindow, setInteractive, sendToRenderer } from './window'
-import { startPortWatcher, stopPortWatcher, getActivePorts, killPort, setPortsListener } from './portWatcher'
-import { createTray, updateTrayPorts, destroyTray, setTrayToggleShelfHandler } from './tray'
+import { createWindow, setInteractive, sendToRenderer, setWindowSettings } from './window'
+import { startPortWatcher, stopPortWatcher, restartPortWatcher, getActivePorts, killPort, setPortsListener } from './portWatcher'
+import { createTray, updateTrayPorts, destroyTray, setTrayToggleShelfHandler, setTrayNavigateHandler, rebuildMenu } from './tray'
+import { initSettings, getSettings, saveSettings, onSettingsChanged } from './settings'
 
 // Single instance lock
 const gotTheLock = app.requestSingleInstanceLock()
@@ -16,7 +17,13 @@ if (!gotTheLock) {
   })
 }
 
+let knownPorts = new Set<number>()
+
 app.whenReady().then(() => {
+  // Initialize settings
+  const settings = initSettings()
+  setWindowSettings(settings)
+
   const win = createWindow()
 
   // Initialize System Tray toggle handler
@@ -27,8 +34,20 @@ app.whenReady().then(() => {
     }
   })
 
+  // Initialize System Tray navigate handler
+  setTrayNavigateHandler((view) => {
+    sendToRenderer('app:navigate', view)
+  })
+
   // Initialize System Tray
   createTray()
+
+  // Listen for settings change
+  onSettingsChanged((updated) => {
+    setWindowSettings(updated)
+    restartPortWatcher(updated.scanInterval)
+    rebuildMenu()
+  })
 
   // Show a helpful desktop notification on first start
   try {
@@ -54,14 +73,33 @@ app.whenReady().then(() => {
     win.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
-  // Hook port updates to renderer and system tray
+  // Hook port updates to renderer, system tray, and optional notification
   setPortsListener((ports) => {
     sendToRenderer('ports:update', ports)
     updateTrayPorts(ports.length)
+
+    const currentSettings = getSettings()
+    if (currentSettings.notifyOnNewPort && Notification.isSupported()) {
+      for (const p of ports) {
+        if (!p.isSystem && !knownPorts.has(p.port)) {
+          const notif = new Notification({
+            title: `Port :${p.port} Listening 🟢`,
+            body: `${p.projectDirName || p.scriptName || p.processName} started on port ${p.port}`
+          })
+          notif.on('click', () => {
+            sendToRenderer('shelf:toggle', true)
+            setInteractive(true)
+          })
+          notif.show()
+        }
+      }
+    }
+
+    knownPorts = new Set(ports.map((p) => p.port))
   })
 
-  // Start the background Port Watcher (scans every 2 seconds)
-  startPortWatcher(2000)
+  // Start the background Port Watcher
+  startPortWatcher(settings.scanInterval)
 
   // Setup IPC Handlers
   ipcMain.handle('state:load', () => {
@@ -78,6 +116,14 @@ app.whenReady().then(() => {
 
   ipcMain.handle('window:set-interactive', (_event, interactive: boolean) => {
     setInteractive(interactive)
+  })
+
+  ipcMain.handle('settings:get', () => {
+    return getSettings()
+  })
+
+  ipcMain.handle('settings:save', (_event, partial) => {
+    return saveSettings(partial)
   })
 })
 

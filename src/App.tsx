@@ -5,21 +5,27 @@ import { useEdgeHover } from './hooks/useEdgeHover'
 import { Header } from './components/Header'
 import { WatcherLogo } from './components/WatcherLogo'
 import { PortCard } from './components/PortCard'
+import { SettingsView } from './components/SettingsView'
 
 export const App: React.FC = () => {
   const isOpen = usePortStore((s) => s.isOpen)
   const ports = usePortStore((s) => s.ports)
   const setPorts = usePortStore((s) => s.setPorts)
+  const currentView = usePortStore((s) => s.currentView)
+  const setCurrentView = usePortStore((s) => s.setCurrentView)
+  const settings = usePortStore((s) => s.settings)
+  const loadSettings = usePortStore((s) => s.loadSettings)
   const { handlePanelMouseEnter, handlePanelMouseLeave } = useEdgeHover()
 
   useEffect(() => {
     const bridge = window.watcher || window.edgemon
     if (!bridge) return
 
-    // Initial state load
+    // Initial state and settings load
     bridge.loadState().then(({ ports }) => {
       setPorts(ports)
     })
+    loadSettings()
 
     // Real-time port broadcast listener
     const unsubPorts = bridge.onPortsUpdate((updated) => {
@@ -33,11 +39,21 @@ export const App: React.FC = () => {
       usePortStore.getState().setIsOpen(next)
     })
 
+    // Real-time view navigation listener (e.g. from tray menu)
+    const unsubNavigate = bridge.onNavigate?.((view) => {
+      setCurrentView(view)
+    })
+
     return () => {
       unsubPorts()
       if (unsubToggle) unsubToggle()
+      if (unsubNavigate) unsubNavigate()
     }
-  }, [setPorts])
+  }, [setPorts, loadSettings, setCurrentView])
+
+  const displayedPorts = settings.showSystemProcesses
+    ? ports
+    : ports.filter((p) => !p.isSystem)
 
   return (
     <div
@@ -73,83 +89,87 @@ export const App: React.FC = () => {
           overflowX: 'hidden'
         }}
       >
-        {/* Header from Reference */}
+        {/* Header from Reference with Settings toggle */}
         <Header />
 
-        {/* Scrollable Cards List */}
-        <div
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '14px',
-            padding: '0 24px 28px 24px',
-            boxSizing: 'border-box'
-          }}
-        >
-          {ports.length === 0 ? (
-            <div
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                padding: '40px 20px',
-                color: 'var(--text-secondary)',
-                gap: '16px'
-              }}
-            >
+        {/* Dynamic View: Services or Settings */}
+        {currentView === 'settings' ? (
+          <SettingsView />
+        ) : (
+          <div
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+              padding: '0 24px 28px 24px',
+              boxSizing: 'border-box'
+            }}
+          >
+            {displayedPorts.length === 0 ? (
               <div
                 style={{
-                  width: '84px',
-                  height: '58px',
-                  borderRadius: '16px',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid var(--border-subtle)',
+                  flex: 1,
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3)'
+                  textAlign: 'center',
+                  padding: '40px 20px',
+                  color: 'var(--text-secondary)',
+                  gap: '16px'
                 }}
               >
-                <WatcherLogo height={32} variant="white" />
-              </div>
+                <div
+                  style={{
+                    width: '84px',
+                    height: '58px',
+                    borderRadius: '16px',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3)'
+                  }}
+                >
+                  <WatcherLogo height={32} variant="white" />
+                </div>
 
-              <div>
-                <div
-                  style={{
-                    fontWeight: 700,
-                    fontSize: '17px',
-                    color: 'var(--text-primary)',
-                    letterSpacing: '-0.02em',
-                    marginBottom: '6px'
-                  }}
-                >
-                  No active ports
-                </div>
-                <div
-                  style={{
-                    fontSize: '12.5px',
-                    color: 'var(--text-tertiary)',
-                    lineHeight: 1.5,
-                    maxWidth: '260px',
-                    margin: '0 auto'
-                  }}
-                >
-                  Run <code>npm run dev</code> or any local server in terminal to automatically track it here.
+                <div>
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: '17px',
+                      color: 'var(--text-primary)',
+                      letterSpacing: '-0.02em',
+                      marginBottom: '6px'
+                    }}
+                  >
+                    No active ports
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '12.5px',
+                      color: 'var(--text-tertiary)',
+                      lineHeight: 1.5,
+                      maxWidth: '260px',
+                      margin: '0 auto'
+                    }}
+                  >
+                    Run <code>npm run dev</code> or any local server in terminal to automatically track it here.
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            ports.map((portItem) => (
-              <PortCard key={`${portItem.port}-${portItem.pid}`} item={portItem} />
-            ))
-          )}
-        </div>
+            ) : (
+              displayedPorts.map((portItem) => (
+                <PortCard key={`${portItem.port}-${portItem.pid}`} item={portItem} />
+              ))
+            )}
+          </div>
+        )}
       </motion.aside>
     </div>
   )
